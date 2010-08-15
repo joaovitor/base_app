@@ -30,7 +30,7 @@ get_file "public/images/ua_ff.jpg"
 get_file "public/images/ua_ie.jpg"
 get_file "public/images/ua_op.jpg"
 get_file "public/images/ua_sf.jpg"
-get_file "public/javascripts/rails.js"
+get "http://github.com/rails/jquery-ujs/raw/master/src/rails.js", "public/javascripts/rails.js"
 run "mkdir public/javascripts/lib public/javascripts/plugins"
 
 # scaffold customization
