@@ -24,7 +24,8 @@ role :db,  domain_name, :primary => true
 #TASKS
 task :after_update_code, :roles => [:web, :db, :app] do
   run "chmod 755 #{release_path}/public"
-  db.upload_database_yaml
+  bundle.install
+  deploy.migrate
   assets.package
 end
 
