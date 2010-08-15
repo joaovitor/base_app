@@ -39,7 +39,7 @@ namespace :deploy do
     desc "#{t} task is a no-op with mod_rails"
     task t, :roles => :app do ; end
   end
-  
+
   namespace :web do
     task :disable, :roles => :web do
       on_rollback { rm "#{shared_path}/system/maintenance.html" }
@@ -49,17 +49,6 @@ namespace :deploy do
       maintenance = ERB.new(File.read("./app/views/layouts/maintenance.html.erb")).result(binding)
 
       put maintenance, "#{shared_path}/system/maintenance.html", :mode => 0644
-    end
-  end  
-end
-
-namespace :log do
-  desc "tail production log files"
-  task :tail, :roles => :app do
-    run "tail -f #{shared_path}/log/production.log" do |channel, stream, data|
-      puts  # para uma linha extra
-      puts "#{channel[:host]}: #{data}"
-      break if stream == :err
     end
   end
 end
@@ -82,7 +71,7 @@ namespace :ssh do
     run "test -f #{ssh_path}/authorized_keys || touch #{ssh_path}/authorized_keys"
     run "cat #{ssh_path}/../id_rsa.pub >> #{ssh_path}/authorized_keys"
     run "chmod 755 #{ssh_path}/authorized_keys"
-    run "rm #{ssh_path}/../id_rsa.pub"    
+    run "rm #{ssh_path}/../id_rsa.pub"
   end
 end
 
@@ -91,33 +80,4 @@ namespace :assets do
  task :package, :roles => :web do
    run "cd #{current_path} && rake asset:packager:build_all"
  end
-end
-
-namespace :db do
-
-  desc "remote backup and download the MySQL database"
-  task :backup, :roles => :db do
-    backup_rb ||= "#{current_path}/lib/backup.rb"
-    run "if [ -f #{backup_rb} ]; then ruby #{backup_rb} backup #{deploy_to} ; fi"
-    get "#{deploy_to}/etc/dump.tar.gz", "#{Date.today.to_s}.tar.gz"
-    run "rm #{deploy_to}/etc/dump.tar.gz"
-  end
-
-  desc "upload and restore of remote MySQL database"
-  task :restore, :roles => :db do
-    unless File.exists?("dump.tar.gz")
-      puts "Backup dump.tar.gz not found"
-      exit 0
-    end
-    backup_rb ||= "#{current_path}/lib/backup.rb"
-    upload "dump.tar.gz", "#{deploy_to}/etc/dump.tar.gz"
-    run "if [ -f #{backup_rb} ]; then ruby #{backup_rb} restore #{deploy_to} ; fi"
-  end
-
-  desc "upload database.yml"
-  task :upload_database_yaml do
-    upload File.join(File.dirname(__FILE__), "database.yml"), "#{shared_path}/database.yml"
-    run "ln -s #{shared_path}/database.yml #{release_path}/config/database.yml"
-  end
-
 end

@@ -1,0 +1,9 @@
+production:
+  database: <%= "#{application}_#{stage}" %>
+  adapter: mysql
+  host: localhost
+  encoding: utf-8
+  reconnect: true
+  pool: 15
+  username: <%="#{application}"%>
+  password: <%="#{Capistrano::CLI.ui.ask("Enter MYSQL database password: ")}"%>
